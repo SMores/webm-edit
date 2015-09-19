@@ -31,7 +31,7 @@ def subtitle() -> Response:
 
 def crop_video(crop: Dict[str, int], filename: str):
     crop_params = 'crop={}:{}:{}:{}'.format(crop['width'], crop['height'], crop['horizontal'], crop['vertical'])
-    subprocess.call(['ffmpeg', '-i', filename, '-vf', crop_params, filename])
+    subprocess.call(['ffmpeg','-nostdin','-y', '-i', filename, '-vf', crop_params, filename])
 
 
 def add_subtitles(sub: Dict[str, Any], filename: str):
