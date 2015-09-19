@@ -31,7 +31,7 @@ def subtitle() -> Response:
 
 def crop_video(crop: Dict[str, int], filename: str):
     crop_params = 'crop={}:{}:{}:{}'.format(crop['width'], crop['height'], crop['horizontal'], crop['vertical'])
-    out_filename = filename.split('.')[0] + '-out.webm'
+    out_filename = filename.split('.')[0] + '-cropped.webm'
     subprocess.call(['ffmpeg', '-i', filename, '-vf', crop_params, out_filename])
 
 
