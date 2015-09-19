@@ -33,12 +33,13 @@ def merge_webm_srt(json):
     srt = create_srt(json)
     command = "ffmpeg -i " + json["video"].name + " -codec:v libvpx -vf " + \
               "subtitles=" + srt + " out.webm"
-    call(command)
+    print command
+    call(command.split())
     return command
 
 if __name__ == '__main__':
     j = {
-        "video":open("morty.webm"),
+        "video":open("0b1"),
         "subtitles" : [
             {"start_time": 0, "end_time" : 3, "text": "ayyy"},
             {"start_time": 4, "end_time" : 7, "text": "ayyy"},
