@@ -46,7 +46,7 @@ def pad_int_to_str(i):
 
 def merge_webm_srt(json):
     srt = create_srt(json)
-    command = "ffmpeg -i " + json["video"].name + " -codec:v libvpx -vf " + \
+    command = "ffmpeg -nostdin -y -i " + json["video"].name + " -codec:v libvpx -vf " + \
               "subtitles=" + srt + " out.webm"
     # print(command)
     # call(command.split())
