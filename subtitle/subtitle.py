@@ -46,22 +46,23 @@ def pad_int_to_str(i):
 
 def merge_webm_srt(json):
     srt = create_srt(json)
-    command = "ffmpeg -nostdin -y -i " + json["video"].name + " -codec:v libvpx -vf " + \
+    command = "ffmpeg -nostdin -y -i " + json["video"].name + " -codec:v libvpx -qmin 0 -qmax 50 -crf 5 -b:v 1M -c:a libvorbis -vf " + \
               "subtitles=" + srt + " out.webm"
     # print(command)
-    # call(command.split())
+    call(command.split())
     return command
 
 if __name__ == '__main__':
     j = {
-        "video":open("morty.webm"),
+        "video":open("dog.webm"),
         "subtitles" : [
-            {"start_time": 0, "end_time" : 3000, "text": "ayyy"},
-            {"start_time": 4321, "end_time" : 7123, "text": "ayyy"},
-            {"start_time": 9471, "end_time" : 13583, "text": "ayyy"},
-            {"start_time": 15879, "end_time" : 16111, "text": "ayyy"},
-            {"start_time": 20537, "end_time" : 30452, "text": "ayyy"},
-            {"start_time": 105675, "end_time" : 120001, "text": "ayyy"}
+            {"start_time": 0, "end_time" : 2000, "text": "waggy waggy waggy waggy"},
+            {"start_time": 3321, "end_time" : 5123, "text": "shaggy"},
+            {"start_time": 6471, "end_time" : 9583, "text": "taggy"},
+            {"start_time": 9879, "end_time" : 10111, "text": "maggy"},
+            {"start_time": 10537, "end_time" : 11452, "text": "4real?"},
+            {"start_time": 11567, "end_time" : 14000, "text": "such creativity bruh"},
+            {"start_time": 14050, "end_time" : 15001, "text": "pen"}
         ]}
     print(merge_webm_srt(j))
 
