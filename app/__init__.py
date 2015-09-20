@@ -3,8 +3,20 @@ import uuid
 import os
 import json
 from typing import Dict, Any, List
-from flask import Flask, Response, request, send_file
+from flask import Flask, Response, Request, request, send_file
 app = Flask(__name__)
+
+
+@app.after_request
+def after_request(request: Request) -> Request:
+    for the_file in os.listdir('tmp'):
+        file_path = os.path.join('tmp', the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
+    return request
 
 
 @app.route('/crop', methods=['POST'])
@@ -19,12 +31,14 @@ def crop() -> Response:
 
 @app.route('/subtitle', methods=['POST'])
 def subtitle() -> Response:
+    print(request.values)
     video = request.files['video']
     filename = os.path.join('tmp', str(uuid.uuid4().hex) + '.webm')
     video.save(filename)
     subtitles = json.loads(request.values['subtitles'])
-    add_subtitles(subtitles, filename)
-    return send_file(os.path.join('..', filename.split('.')[0] + '-subbed.webm'), mimetype='video/webm')
+    optimize = bool(request.values['optimize'])
+    add_subtitles(subtitles, filename, optimize)
+    return send_file(os.path.join('..', filename.split('.')[0] + '-opt.gif'), mimetype='image/gif')
 
 
 def crop_video(crop: Dict[str, int], filename: str):
@@ -55,8 +69,13 @@ def create_srt(subtitles: List[Dict[str, Any]], filename: str) -> str:
     return srt_filename
 
 
-def add_subtitles(subtitles: List[Dict[str, Any]], filename: str):
+def add_subtitles(subtitles: List[Dict[str, Any]], filename: str, optimize: bool):
     srt_filename = create_srt(subtitles, filename)
-    command = ("ffmpeg -nostdin -y -i {0} -codec:v libvpx -qmin 0 -qmax 50 -crf 5 -b:v 1M -c:a libvorbis -vf " +
-               "subtitles={1} {2}").format(filename, srt_filename, filename.split('.')[0] + '-subbed.webm')
-    subprocess.call(command.split())
+    ffmpeg = ("ffmpeg -nostdin -y -i {0} -vf subtitles={1} -pix_fmt rgb24 {2}").format(filename, srt_filename, filename.split('.')[0] + '-subbed.gif')
+    convert = ("convert {0} -coalesce -layers OptimizeFrame {1}").format(filename.split('.')[0] + '-subbed.gif', filename.split('.')[0] + '-frame-opt.gif')
+    gifsicle = ("gifsicle -O2 {0} -o {1}").format(filename.split('.')[0] + '-frame-opt.gif', filename.split('.')[0] + '-opt.gif')
+    subprocess.call(ffmpeg.split())
+    if optimize:
+        print('Optimizing!')
+        subprocess.call(convert.split())
+        subprocess.call(gifsicle.split())
